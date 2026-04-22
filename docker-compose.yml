@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: crm
+      POSTGRES_PASSWORD: crm_secret
+      POSTGRES_DB: ai_crm
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Alembic
+alembic/versions/*.pyc
