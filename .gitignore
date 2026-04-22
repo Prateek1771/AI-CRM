@@ -7,10 +7,10 @@ __pycache__/
 dist/
 build/
 .pytest_cache/
+*.db
 
 # Node
 node_modules/
-dist/
 .env.local
 .env.*.local
 
