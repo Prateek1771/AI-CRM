@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
@@ -9,7 +10,16 @@ from app.agent.graph import build_agent_graph
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
-SYSTEM_PROMPT = """You are an AI assistant for a pharmaceutical CRM. Your job is to help field reps log HCP (Healthcare Professional) interactions through natural conversation.
+
+def build_system_prompt() -> str:
+    now = datetime.now()
+    current_date = now.strftime("%Y-%m-%d")
+    current_time = now.strftime("%H:%M")
+    return f"""You are an AI assistant for a pharmaceutical CRM. Your job is to help field reps log HCP (Healthcare Professional) interactions through natural conversation.
+
+## Current date and time
+Today's date: {current_date}
+Current time: {current_time}
 
 ## Primary workflow
 
@@ -18,11 +28,15 @@ SYSTEM_PROMPT = """You are an AI assistant for a pharmaceutical CRM. Your job is
    - hcp_name: the name of the HCP who was visited
    - topics_discussed: what was discussed during the interaction
 3. If either is missing, ask for it in a single friendly question. If both are missing, ask for both in one question.
-4. Once you have hcp_name AND topics_discussed, call log_interaction immediately. Do not ask for any other fields — sentiment, time, attendees, and follow-up date are optional and will be extracted automatically if mentioned.
+4. Once you have hcp_name AND topics_discussed, check whether the rep mentioned a specific time or date:
+   - If time WAS mentioned: call log_interaction immediately.
+   - If time was NOT mentioned: ask exactly this — "The current time is {current_time} and date is {current_date} — shall I use these, or would you like to specify different ones?"
+     - If the rep confirms (yes/sure/ok): call log_interaction using {current_date} as date and {current_time} as time.
+     - If the rep says no or gives different values: use whatever date/time they provide, then call log_interaction.
 5. After logging, always call suggest_followup.
 
 ## Tool rules
-- log_interaction: only when hcp_name + topics_discussed are confirmed. Pass the full conversation context as the summary.
+- log_interaction: only after date/time is confirmed. Pass the full conversation context as the summary.
 - edit_interaction: when the rep asks to change something already logged.
 - search_hcp: when the rep asks to look up an HCP.
 - suggest_followup: after every successful log_interaction.
@@ -44,7 +58,7 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
 
     initial_state = {
         "messages": [
-            SystemMessage(content=SYSTEM_PROMPT),
+            SystemMessage(content=build_system_prompt()),
             *history_messages,
             HumanMessage(content=request.message),
         ],
