@@ -1,9 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
-import { setField } from "../../store/formSlice";
+import { setField, clearAiHighlight } from "../../store/formSlice";
 
 export default function TopicsSection() {
   const dispatch = useDispatch();
-  const { topics_discussed } = useSelector((s) => s.form);
+  const { topics_discussed, aiPopulatedFields } = useSelector((s) => s.form);
 
   return (
     <div>
@@ -13,7 +13,8 @@ export default function TopicsSection() {
         onChange={(e) => dispatch(setField({ field: "topics_discussed", value: e.target.value }))}
         placeholder="Enter key discussion points..."
         rows={4}
-        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+        className={`w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none ${aiPopulatedFields.includes("topics_discussed") ? "ai-populated" : ""}`}
+        onAnimationEnd={() => dispatch(clearAiHighlight("topics_discussed"))}
       />
       <button className="mt-1 text-xs text-blue-600 flex items-center gap-1 hover:text-blue-800">
         🎤 Summarize from Voice Note (Requires Consent)

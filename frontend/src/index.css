@@ -2,3 +2,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes ai-flash {
+  0%   { background-color: #eff6ff; box-shadow: 0 0 0 2px #3b82f6; }
+  60%  { background-color: #dbeafe; box-shadow: 0 0 0 2px #3b82f6; }
+  100% { background-color: transparent; box-shadow: none; }
+}
+
+.ai-populated {
+  animation: ai-flash 1.2s ease-out forwards;
+  border-radius: 0.375rem;
+}

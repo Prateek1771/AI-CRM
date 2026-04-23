@@ -1,9 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
-import { setField } from "../../store/formSlice";
+import { setField, clearAiHighlight } from "../../store/formSlice";
 
 export default function OutcomesSection() {
   const dispatch = useDispatch();
-  const { outcomes } = useSelector((s) => s.form);
+  const { outcomes, aiPopulatedFields } = useSelector((s) => s.form);
 
   return (
     <div>
@@ -13,7 +13,8 @@ export default function OutcomesSection() {
         onChange={(e) => dispatch(setField({ field: "outcomes", value: e.target.value }))}
         placeholder="Key outcomes or agreements..."
         rows={3}
-        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+        className={`w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none ${aiPopulatedFields.includes("outcomes") ? "ai-populated" : ""}`}
+        onAnimationEnd={() => dispatch(clearAiHighlight("outcomes"))}
       />
     </div>
   );

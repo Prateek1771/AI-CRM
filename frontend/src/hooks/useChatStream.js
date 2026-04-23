@@ -1,4 +1,4 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addMessage, setStreaming, appendStreamChunk, finalizeStream, setSuggestions } from "../store/chatSlice";
 import { populateForm } from "../store/formSlice";
 
@@ -6,16 +6,23 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export function useChatStream() {
   const dispatch = useDispatch();
+  const messages = useSelector((s) => s.chat.messages);
 
   const sendMessage = async (message, interactionId = null) => {
     dispatch(addMessage({ role: "user", content: message }));
     dispatch(setStreaming(true));
 
+    // Skip index 0 (static welcome hint) — only send real conversation turns
+    const history = messages.slice(1).map((m) => ({
+      role: m.role === "assistant" ? "assistant" : "user",
+      content: m.content,
+    }));
+
     try {
       const response = await fetch(`${API_URL}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, interaction_id: interactionId }),
+        body: JSON.stringify({ message, interaction_id: interactionId, history }),
       });
 
       const reader = response.body.getReader();

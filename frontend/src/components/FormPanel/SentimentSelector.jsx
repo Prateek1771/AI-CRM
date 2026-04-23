@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { setField } from "../../store/formSlice";
+import { setField, clearAiHighlight } from "../../store/formSlice";
 
 const OPTIONS = [
   { value: "positive", label: "Positive", emoji: "😊" },
@@ -9,12 +9,15 @@ const OPTIONS = [
 
 export default function SentimentSelector() {
   const dispatch = useDispatch();
-  const { sentiment } = useSelector((s) => s.form);
+  const { sentiment, aiPopulatedFields } = useSelector((s) => s.form);
 
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">Observed/Inferred HCP Sentiment</label>
-      <div className="flex gap-6">
+      <div
+        className={`flex gap-6 rounded-md p-1 ${aiPopulatedFields.includes("sentiment") ? "ai-populated" : ""}`}
+        onAnimationEnd={() => dispatch(clearAiHighlight("sentiment"))}
+      >
         {OPTIONS.map((opt) => (
           <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
             <input

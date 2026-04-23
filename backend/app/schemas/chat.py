@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 
 
 class ChatMessage(BaseModel):
@@ -10,3 +11,4 @@ class ChatRequest(BaseModel):
     message: str
     session_id: str | None = None
     interaction_id: str | None = None
+    history: List[ChatMessage] = []

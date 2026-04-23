@@ -13,12 +13,15 @@ class InteractionExtraction(BaseModel):
     hcp_name: str | None = None
     interaction_type: str | None = "Meeting"
     date: str | None = None
+    time: str | None = None
+    attendees: list[str] | None = None
     topics_discussed: str | None = None
     materials_shared: list[str] | None = None
     samples_distributed: list[str] | None = None
     sentiment: Literal["positive", "neutral", "negative"] | None = None
     outcomes: str | None = None
     follow_up_actions: str | None = None
+    follow_up_date: str | None = None
 
 
 def extract_interaction_fields(summary: str, llm) -> dict:
@@ -54,16 +57,35 @@ def make_log_interaction_tool(db: Session):
             except ValueError:
                 pass
 
+        interaction_time = None
+        if fields.get("time"):
+            for fmt in ("%H:%M:%S", "%H:%M"):
+                try:
+                    interaction_time = datetime.strptime(fields["time"], fmt).time()
+                    break
+                except ValueError:
+                    continue
+
+        follow_up_date_parsed = None
+        if fields.get("follow_up_date"):
+            try:
+                follow_up_date_parsed = datetime.strptime(fields["follow_up_date"], "%Y-%m-%d").date()
+            except ValueError:
+                pass
+
         interaction = Interaction(
             hcp_id=hcp_id,
             interaction_type=fields.get("interaction_type") or "Meeting",
             date=interaction_date,
+            time=interaction_time,
+            attendees=fields.get("attendees"),
             topics_discussed=fields.get("topics_discussed"),
             materials_shared=fields.get("materials_shared"),
             samples_distributed=fields.get("samples_distributed"),
             sentiment=fields.get("sentiment"),
             outcomes=fields.get("outcomes"),
             follow_up_actions=fields.get("follow_up_actions"),
+            follow_up_date=follow_up_date_parsed,
             raw_chat_summary=summary,
         )
         db.add(interaction)
@@ -75,12 +97,15 @@ def make_log_interaction_tool(db: Session):
             "hcp_id": hcp_id,
             "interaction_type": interaction.interaction_type,
             "date": str(interaction.date),
+            "time": str(interaction.time) if interaction.time else "",
+            "attendees": interaction.attendees or [],
             "topics_discussed": interaction.topics_discussed or "",
             "materials_shared": interaction.materials_shared or [],
             "samples_distributed": interaction.samples_distributed or [],
             "sentiment": interaction.sentiment,
             "outcomes": interaction.outcomes or "",
             "follow_up_actions": interaction.follow_up_actions or "",
+            "follow_up_date": str(interaction.follow_up_date) if interaction.follow_up_date else None,
         }
 
         return {"interaction_id": interaction.id, "form_update": form_update}
