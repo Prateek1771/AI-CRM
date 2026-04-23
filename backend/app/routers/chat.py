@@ -42,7 +42,18 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
         ]
 
         response_text = ai_messages[-1].content if ai_messages else "Done."
-        form_update = final_state.get("form_update")
+
+        # Extract form_update from tool results (log_interaction / edit_interaction return it)
+        form_update = None
+        for msg in final_state["messages"]:
+            if getattr(msg, "type", None) == "tool":
+                try:
+                    content = msg.content
+                    tool_result = json.loads(content) if isinstance(content, str) else content
+                    if isinstance(tool_result, dict) and "form_update" in tool_result:
+                        form_update = tool_result["form_update"]
+                except (json.JSONDecodeError, TypeError):
+                    pass
 
         for chunk in response_text:
             yield f"data: {json.dumps({'type': 'text', 'content': chunk})}\n\n"
