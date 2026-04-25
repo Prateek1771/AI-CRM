@@ -1,6 +1,6 @@
 # AI CRM — HCP Interaction Logger
 
-A full-stack AI-powered CRM tool for pharmaceutical field reps to log Healthcare Professional (HCP) interactions via natural language chat. Describe a visit in plain English; the AI extracts structured data, auto-populates a form, and saves the record to PostgreSQL — all in real time via streaming.
+A full-stack AI-powered CRM tool for pharmaceutical field reps to log Healthcare Professional (HCP) interactions via natural language chat. Describe a visit in plain English; the AI extracts structured data and pre-fills a form in real time.
 
 ---
 
@@ -171,7 +171,7 @@ ai-crm-hcp/
 │   │           ├── log_interaction.py    # Extract fields + save to DB
 │   │           ├── edit_interaction.py   # Edit a field via natural language
 │   │           ├── list_interactions.py  # List by period (today/week/month/all)
-│   │           ├── find_interaction.py   # Find interaction for editing
+│   │           ├��─ find_interaction.py   # Find interaction for editing
 │   │           ├── suggest_followup.py   # Generate follow-up suggestions
 │   │           └── search_hcp.py         # HCP name lookup
 │   ├── alembic/
@@ -427,5 +427,3 @@ Environment:      VITE_API_URL=https://your-backend-url
 ```bash
 alembic upgrade head
 ```
-#   A I - C R M  
- 
